@@ -1,0 +1,9 @@
+{
+  	"id":"HexShields",
+	"name":"Hexagonal Shieldidgeridoos",
+	"author":"tomatopaste",
+	"version":"1.0.0",
+	"description":"real",
+	"gameVersion":"0.95.1a-RC4",
+	"jars": ["jars/HexShields.jar"]
+}

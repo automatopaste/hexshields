@@ -1,0 +1,8 @@
+{
+	"plugins":{
+	"HexShields_CombatPlugin":"data.scripts.plugins.HexShields_CombatPlugin",
+	},
+
+	"HexShields_HexFill":false,
+}
+
