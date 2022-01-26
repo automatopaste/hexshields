@@ -97,9 +97,9 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
             }
         }
 
-        String s = " ";
-        if (drawTargets.size() > 0) s += Arrays.toString(drawTargets.get(0).inner.getRGBColorComponents(new float[3]));
-        Global.getCombatEngine().maintainStatusForPlayerShip(this, null, "draw targets", "" + drawTargets.size() + s, true);
+//        String s = " ";
+//        if (drawTargets.size() > 0) s += Arrays.toString(drawTargets.get(0).inner.getRGBColorComponents(new float[3]));
+//        Global.getCombatEngine().maintainStatusForPlayerShip(this, null, "draw targets", "" + drawTargets.size() + s, true);
     }
 
     @Override
