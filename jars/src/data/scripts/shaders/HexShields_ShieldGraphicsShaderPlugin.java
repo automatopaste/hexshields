@@ -58,9 +58,23 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
 
     @Override
     public void advance(float amount) {
-        for (Iterator<ShieldRendererData> iterator = drawTargets.iterator(); iterator.hasNext(); ) {
+        for (Iterator<ShieldRendererData> iterator = drawTargets.iterator(); iterator.hasNext();) {
             ShieldRendererData data = iterator.next();
-            if (!Global.getCombatEngine().isEntityInPlay(data.target) || !data.target.isAlive() || data.target.isHulk()) iterator.remove();
+
+            // shield fadeout check
+            if (data.target.getShield().isOff()) data.alphaMult -= amount * 2f;
+            else data.alphaMult = 1f;
+
+            if (!Global.getCombatEngine().isEntityInPlay(data.target) || !data.target.isAlive() || data.target.isHulk() || data.alphaMult <= 0f) {
+                data.target.getShield().setRingColor(data.target.getHullSpec().getShieldSpec().getRingColor());
+                data.target.getShield().setInnerColor(data.target.getHullSpec().getShieldSpec().getInnerColor());
+                iterator.remove();
+            }
+
+            Color i = data.target.getShield().getInnerColor();
+            if (checkNonZeroAlpha(i)) data.inner = new Color(i.getRed(), i.getGreen(), i.getBlue(), i.getAlpha());
+            Color r = data.target.getShield().getRingColor();
+            if (checkNonZeroAlpha(r)) data.ring = new Color(r.getRed(), r.getGreen(), r.getBlue(), r.getAlpha());
 
             data.target.getShield().setInnerColor(new Color(0,0,0,0));
             data.target.getShield().setRingColor(new Color(0,0,0,0));
@@ -68,15 +82,24 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
 
         out:
         for (ShipAPI ship : Global.getCombatEngine().getShips()) {
-            if (ship.getShield() != null && ship.getShield().isOn() && INCLUDED_HULL_STYLES.contains(ship.getHullStyleId())) {
-                for (ShieldRendererData data : drawTargets) if (data.target.equals(ship)) continue out;
+            if (ship.getShield() != null) {
+                if (ship.getShield().isOn() && INCLUDED_HULL_STYLES.contains(ship.getHullStyleId())) {
+                    for (ShieldRendererData data : drawTargets) if (data.target.equals(ship)) {
+                        continue out;
+                    }
 
-                drawTargets.add(new ShieldRendererData(ship, ship.getShield().getInnerColor(), ship.getShield().getRingColor()));
+                    drawTargets.add(new ShieldRendererData(ship, ship.getHullSpec().getShieldSpec().getInnerColor(), ship.getHullSpec().getShieldSpec().getRingColor()));
 
-                ship.getShield().setInnerColor(new Color(0,0,0,0));
-                ship.getShield().setRingColor(new Color(0,0,0,0));
+                    //avoid single frame shield render
+                    ship.getShield().setInnerColor(new Color(0,0,0,0));
+                    ship.getShield().setRingColor(new Color(0,0,0,0));
+                }
             }
         }
+
+        String s = " ";
+        if (drawTargets.size() > 0) s += Arrays.toString(drawTargets.get(0).inner.getRGBColorComponents(new float[3]));
+        Global.getCombatEngine().maintainStatusForPlayerShip(this, null, "draw targets", "" + drawTargets.size() + s, true);
     }
 
     @Override
@@ -180,6 +203,8 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
             Color c2 = data.ring;
             Vector4f colour = new Vector4f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, c.getAlpha() / 255f);
             Vector4f colour2 = new Vector4f(c2.getRed() / 255f, c2.getGreen() / 255f, c2.getBlue() / 255f, c2.getAlpha() / 255f);
+            colour.w *= data.alphaMult;
+            colour2.w *= data.alphaMult;
 
             colour.store(colourBuffer);
             colour2.store(colour2Buffer);
@@ -288,11 +313,17 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
         public ShipAPI target;
         public Color inner;
         public Color ring;
+        public float alphaMult;
 
         public ShieldRendererData(ShipAPI target, Color inner, Color ring) {
             this.target = target;
             this.inner = inner;
             this.ring = ring;
+            alphaMult = 1f;
         }
+    }
+
+    private boolean checkNonZeroAlpha(Color c) {
+        return c.getAlpha() != 0;
     }
 }

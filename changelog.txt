@@ -1,0 +1,9 @@
+v1.0.1
+- added shield fadeout
+- removed conflict with scripted shield colour shifting
+- tweaked visuals
+- slightly reduced hax level
+- enabled utility flag
+
+v1.0.0
+- initial version
