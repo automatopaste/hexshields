@@ -49,8 +49,9 @@ vec4 getHex(vec2 p)
 }
 
 void main() {
+    const float jitter = 0.00125;
     vec2 n = vec2(vCoord.x * 2.0 - 1.0, vCoord.y * 2.0 - 1.0);
-    n += (shield.xy * 2.0 - 1.0) * 0.0015; // final value here is jitter level, can adjust to taste
+    n += (shield.xy * 2.0 - 1.0) * jitter;
 
     vec2 pc = vec2(atan(n.y, n.x), length(n));
     pc.y = asin(pc.y);
@@ -96,12 +97,13 @@ void main() {
 //    if (shieldLag < (ii + 1.0) * interval) discard;
 
 //    float damp = clamp(max(0.0, shieldLag - ((ii + 1.0) * interval)) / interval * 0.5, 0.0, 1.0);
-    float damp = clamp(max(0.0, shieldLag - fa) * 0.1, 0.0, 1.0);
-    if (fa > 180.00 - interval * 10.0 && shieldLag > fa) damp = 1.0;
+    float damp = clamp(max(0.0, shieldLag - fa + 2.0) * 0.05, 0.0, 1.0);
+    //if (fa > 180.00 - interval * 0.5 && shieldLag > fa) damp = 1.0;
+    damp = clamp(damp + clamp(dev - 179.0, 0.0, 1.0), 0.0, 1.0);
 
     fColor.a *= l * ff * damp * color.a * 2.0;
     fColor.rgb = color.rgb;
 
     //ring color
-    fColor += color2 * g * t * 0.5 * damp;
+    fColor += color2 * g * t * 0.25 * damp;
 }

@@ -30,14 +30,17 @@ import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
  * Super efficient instanced shader for shield systems
  */
 public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedRenderingPlugin {
-    private static List<String> INCLUDED_HULL_STYLES = new ArrayList<>();
+
+    private static final List<String> INCLUDED_HULL_STYLES = new ArrayList<>();
 
     private final List<ShieldRendererData> drawTargets;
     private final boolean fill;
+    private final boolean useDefaultRing;
 
     public HexShields_ShieldGraphicsShaderPlugin() {
         drawTargets = new ArrayList<>();
         fill = Global.getSettings().getBoolean("HexShields_HexFill");
+        useDefaultRing = Global.getSettings().getBoolean("HexShields_UseDefaultRing");
 
         try {
             JSONArray data = Global.getSettings().getMergedSpreadsheetDataForMod("hullstyle_id", "data/config/hex_whitelist.csv", "HexShields");
@@ -77,7 +80,7 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
             if (checkNonZeroAlpha(r)) data.ring = new Color(r.getRed(), r.getGreen(), r.getBlue(), r.getAlpha());
 
             data.target.getShield().setInnerColor(new Color(0,0,0,0));
-            data.target.getShield().setRingColor(new Color(0,0,0,0));
+            if (!useDefaultRing) data.target.getShield().setRingColor(new Color(0,0,0,0));
         }
 
         out:
@@ -92,7 +95,7 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
 
                     //avoid single frame shield render
                     ship.getShield().setInnerColor(new Color(0,0,0,0));
-                    ship.getShield().setRingColor(new Color(0,0,0,0));
+                    if (!useDefaultRing) ship.getShield().setRingColor(new Color(0,0,0,0));
                 }
             }
         }
@@ -278,8 +281,8 @@ public class HexShields_ShieldGraphicsShaderPlugin extends HexShields_InstancedR
 
         Vector2f size = new Vector2f(ship.getShieldRadiusEvenIfNoShield() * 2f, ship.getShieldRadiusEvenIfNoShield() * 2f);
         Vector2f offset = new Vector2f(ship.getShieldRadiusEvenIfNoShield(),ship.getShieldRadiusEvenIfNoShield());
-//        size.scale(0.95f);
-//        offset.scale(0.95f);
+        size.scale(1.01f);
+        offset.scale(1.01f);
 
         matrix.translate(new Vector3f(-offset.x, -offset.y, 0f));
         matrix.scale(new Vector3f(size.x, size.y, 1f));

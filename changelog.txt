@@ -1,3 +1,8 @@
+v1.1.0
+- default mode now removes dark edge, has config option to revert
+- smoothed seam when transitioning to 360 shield
+- made jitter value easier to edit
+
 v1.0.1
 - added shield fadeout
 - removed conflict with scripted shield colour shifting
