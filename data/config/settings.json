@@ -4,6 +4,9 @@
 	},
 
 	"HexShields_HexFill":true,
-	"HexShields_UseDefaultRing":true,
+	"HexShields_UseDefaultRing":false,
+
+	"HexShields_Vert":"data/shaders/shield.vert",
+	"HexShields_Frag":"data/shaders/shield.frag",
 }
 

@@ -8,13 +8,9 @@ in vec4 shield;
 out vec4 fColor;
 
 #define FLAT_TOP_HEXAGON = true;
+#define M_PI 3.1415926535897932384626433832795
 
-//#ifdef FLAT_TOP_HEXAGON
 const vec2 s = vec2(1.7320508, 1);
-//#else
-//const vec2 s = vec2(1, 1.7320508);
-//#endif
-
 const float PI = 3.14159265359;
 
 float hash21(vec2 p)
@@ -25,16 +21,13 @@ float hash21(vec2 p)
 float hex(in vec2 p)
 {
     p = abs(p);
+
     return max(dot(p, s*.5), p.y); // Hexagon.
 }
 
 vec4 getHex(vec2 p)
 {
-//    #ifdef FLAT_TOP_HEXAGON
     vec4 hC = floor(vec4(p, p - vec2(1, .5))/s.xyxy) + .5;
-//    #else
-//    vec4 hC = floor(vec4(p, p - vec2(.5, 1))/s.xyxy) + .5;
-//    #endif
 
     vec4 h = vec4(p - hC.xy*s, p - (hC.zw + .5)*s);
 
@@ -49,8 +42,15 @@ vec2 rotate(vec2 v, float angle) {
     return vec2(v.x * cs - v.y * sn, v.x * sn + v.y * cs);
 }
 
+vec3 getHueColor(vec2 pos)
+{
+    float theta = 3.0 + 3.0 * atan(pos.x, pos.y) / M_PI;
+    vec3 color = vec3(0.0);
+    return clamp(abs(mod(theta + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+}
+
 void main() {
-    const float jitter = 0.0;
+    const float jitter = 0.00125;
     vec2 n = vec2(vCoord.x * 2.0 - 1.0, vCoord.y * 2.0 - 1.0);
     n += (shield.xx * 2.0 - 1.0) * jitter;
 
@@ -68,9 +68,7 @@ void main() {
     float eDist = hex(h.xy); // Edge distance.
 
     // Initiate the background to a white color, putting in some dark borders.
-    float fill = shield.z + 1.0 * 0.5;
-    //fill *= abs(sin(dist * (3.0 + 3.0 * shield.z)));
-    float hexColor = mix(fill, abs(fill - 1.0), smoothstep(0., .2, eDist * eDist * eDist));
+    float hexColor = mix(shield.z, abs(shield.z - 1.0), smoothstep(0., .2, eDist * eDist * eDist));
     fColor.a = hexColor;
 
     const float frac = 0.97;
@@ -102,7 +100,8 @@ void main() {
     damp = clamp(damp + clamp(dev - 179.0, 0.0, 1.0), 0.0, 1.0);
 
     fColor.a *= l * ff * damp * color.a * 2.0;
-    fColor.rgb = color.rgb;
+//    fColor.rgb = color.rgb;
+    fColor.rgb = getHueColor(vCoord);
 
     //ring color
     fColor += color2 * g * t * 0.25 * damp;

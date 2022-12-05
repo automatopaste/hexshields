@@ -7,40 +7,37 @@ in vec4 shield;
 
 out vec4 fColor;
 
-#define FLAT_TOP_HEXAGON = true;
-
-//#ifdef FLAT_TOP_HEXAGON
-const vec2 s = vec2(1.7320508, 1);
-//#else
-//const vec2 s = vec2(1, 1.7320508);
-//#endif
-
 const float PI = 3.14159265359;
 
-float hash21(vec2 p)
-{
-    return fract(sin(dot(p, vec2(141.13, 289.97)))*43758.5453);
+// credit: MaxBittker from https://github.com/MaxBittker/glsl-voronoi-noise
+const mat2 myt = mat2(.12121212, .13131313, -.13131313, .12121212);
+const vec2 mys = vec2(1e4, 1e6);
+
+vec2 rhash(vec2 fCoord) {
+    fCoord *= myt;
+    fCoord *= mys;
+    return fract(fract(fCoord / mys) * fCoord);
 }
 
-float hex(in vec2 p)
-{
-    p = abs(p);
-    return max(dot(p, s*.5), p.y); // Hexagon.
+vec3 hash(vec3 p) {
+    return fract(sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)),
+    dot(p, vec3(57.0, 113.0, 1.0)),
+    dot(p, vec3(113.0, 1.0, 57.0)))) *
+    43758.5453);
 }
 
-vec4 getHex(vec2 p)
-{
-//    #ifdef FLAT_TOP_HEXAGON
-    vec4 hC = floor(vec4(p, p - vec2(1, .5))/s.xyxy) + .5;
-//    #else
-//    vec4 hC = floor(vec4(p, p - vec2(.5, 1))/s.xyxy) + .5;
-//    #endif
-
-    vec4 h = vec4(p - hC.xy*s, p - (hC.zw + .5)*s);
-
-    return dot(h.xy, h.xy) < dot(h.zw, h.zw)
-    ? vec4(h.xy, hC.xy)
-    : vec4(h.zw, hC.zw + .5);
+float voronoi2d(const in vec2 point) {
+    vec2 p = floor(point);
+    vec2 f = fract(point);
+    float res = 0.0;
+    for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            vec2 b = vec2(i, j);
+            vec2 r = vec2(b) - f + rhash(p + b);
+            res += 1. / pow(dot(r, r), 8.);
+        }
+    }
+    return pow(1. / res, 0.0625);
 }
 
 vec2 rotate(vec2 v, float angle) {
@@ -50,7 +47,7 @@ vec2 rotate(vec2 v, float angle) {
 }
 
 void main() {
-    const float jitter = 0.0;
+    const float jitter = 0.00125;
     vec2 n = vec2(vCoord.x * 2.0 - 1.0, vCoord.y * 2.0 - 1.0);
     n += (shield.xx * 2.0 - 1.0) * jitter;
 
@@ -60,17 +57,12 @@ void main() {
 
     float dist = 2.0 * length(vCoord - vec2(0.5, 0.5));
 
-    const float mult = 24.0;
-    vec4 h = getHex(loc * mult + s.yx - vec2(0.15, 0.2));
-
-    // The beauty of working with hexagonal centers is that the relative edge distance will simply
-    // be the value of the 2D isofield for a hexagon.
-    float eDist = hex(h.xy); // Edge distance.
+    const float mult = 10.0;
+    float eDist = voronoi2d(loc * mult);
 
     // Initiate the background to a white color, putting in some dark borders.
-    float fill = shield.z + 1.0 * 0.5;
-    //fill *= abs(sin(dist * (3.0 + 3.0 * shield.z)));
-    float hexColor = mix(fill, abs(fill - 1.0), smoothstep(0., .2, eDist * eDist * eDist));
+//    float hexColor = mix(shield.z, abs(shield.z - 1.0), smoothstep(0., .2, eDist * eDist * eDist));
+    float hexColor = eDist;
     fColor.a = hexColor;
 
     const float frac = 0.97;
@@ -92,7 +84,7 @@ void main() {
 
     // shield arc
     float dev = shield.w * 0.5;
-//    float dev = 180.0;
+    //    float dev = 180.0;
     float t = clamp(max(0.0, dev - fa) * 360.0, 0.0, 1.0);
 
     float numSectors = mult * 6.0;

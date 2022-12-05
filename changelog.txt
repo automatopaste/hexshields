@@ -1,3 +1,7 @@
+v2.0.0
+- vastly optimised render code
+- use CMUtils library
+
 v1.1.0
 - default mode now removes dark edge, has config option to revert
 - smoothed seam when transitioning to 360 shield
