@@ -1,4 +1,4 @@
-v2.0.0
+v1.2.0
 - vastly optimised render code
 - use CMUtils library
 

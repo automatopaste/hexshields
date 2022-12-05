@@ -2,9 +2,15 @@
   	"id":"HexShields",
 	"name":"Hexagonal Shieldidgeridoos",
 	"author":"tomatopaste",
-	"version":"1.1.0",
+	"version":"1.2.0",
 	"description":"real",
 	"gameVersion":"0.95.1a-RC6",
 	"jars": ["jars/HexShields.jar"],
 	"utility": true,
+    "dependencies": [
+        {
+            "id": "cmutils",
+            "name": "Combat Misc Utils",
+        },
+    ],
 }
