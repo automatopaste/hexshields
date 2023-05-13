@@ -3,10 +3,14 @@
 	"HexShields_CombatPlugin":"data.scripts.plugins.HexShields_CombatPlugin",
 	},
 
-	"HexShields_HexFill":true,
+	"HexShields_HexFill":true, # recommend setting this to true if using vanilla mode
 	"HexShields_UseDefaultRing":false,
 
 	"HexShields_Vert":"data/shaders/shield.vert",
+
+	# HEXAGON MODE
 	"HexShields_Frag":"data/shaders/shield.frag",
+	# VANILLA IMITATION MODE
+	# "HexShields_Frag":"data/shaders/shield_vanilla.frag",
 }
 

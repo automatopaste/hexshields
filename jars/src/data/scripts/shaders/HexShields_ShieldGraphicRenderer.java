@@ -82,8 +82,10 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
             Color r = data.target.getShield().getRingColor();
             if (checkNonZeroAlpha(r)) data.ring = new Color(r.getRed(), r.getGreen(), r.getBlue(), r.getAlpha());
 
-            data.target.getShield().setInnerColor(new Color(0,0,0,0));
-            if (!useDefaultRing) data.target.getShield().setRingColor(new Color(0,0,0,0));
+//            data.target.getShield().setInnerColor(new Color(0,0,0,0));
+//            if (!useDefaultRing) data.target.getShield().setRingColor(new Color(0,0,0,0));
+
+            data.target.getShield().setSkipRendering(true);
         }
 
         out:
@@ -97,8 +99,9 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
                     drawTargets.add(new ShieldRendererData(ship, ship.getHullSpec().getShieldSpec().getInnerColor(), ship.getHullSpec().getShieldSpec().getRingColor()));
 
                     //avoid single frame shield render
-                    ship.getShield().setInnerColor(new Color(0,0,0,0));
-                    if (!useDefaultRing) ship.getShield().setRingColor(new Color(0,0,0,0));
+//                    ship.getShield().setInnerColor(new Color(0,0,0,0));
+//                    if (!useDefaultRing) ship.getShield().setRingColor(new Color(0,0,0,0));
+                    ship.getShield().setSkipRendering(true);
                 }
             }
         }
@@ -269,11 +272,6 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
         program.link();
 
         return program;
-    }
-
-    @Override
-    public EnumSet<CombatEngineLayers> getActiveLayers() {
-        return EnumSet.of(CombatEngineLayers.ABOVE_SHIPS_LAYER);
     }
 
     private boolean checkNonZeroAlpha(Color c) {
