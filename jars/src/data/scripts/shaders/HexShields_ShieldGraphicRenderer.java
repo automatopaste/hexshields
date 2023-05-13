@@ -34,8 +34,7 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
     private static final List<String> INCLUDED_HULL_STYLES = new ArrayList<>();
 
     private final List<ShieldRendererData> drawTargets;
-    private final boolean fill;
-    private final boolean useDefaultRing;
+    private boolean fill;
     private float fillCounter;
 
     private FloatBuffer projectionBuffer;
@@ -47,8 +46,6 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
 
     public HexShields_ShieldGraphicRenderer() {
         drawTargets = new ArrayList<>();
-        fill = Global.getSettings().getBoolean("HexShields_HexFill");
-        useDefaultRing = Global.getSettings().getBoolean("HexShields_UseDefaultRing");
 
         try {
             JSONArray data = Global.getSettings().getMergedSpreadsheetDataForMod("hullstyle_id", "data/config/hex_whitelist.csv", "HexShields");
@@ -261,7 +258,18 @@ public class HexShields_ShieldGraphicRenderer extends BaseRenderPlugin {
         String vert, frag;
         try {
             vert = Global.getSettings().loadText(Global.getSettings().getString("HexShields_Vert"));
-            frag = Global.getSettings().loadText(Global.getSettings().getString("HexShields_Frag"));
+
+            String type = Global.getSettings().getString("HexShields_HexMode");
+            if (type.equals("default")) {
+                frag = Global.getSettings().loadText("data/shaders/shield.frag");
+                fill = true;
+            } else if (type.equals("nofill")) {
+                frag = Global.getSettings().loadText("data/shaders/shield_nofill.frag");
+                fill = false;
+            } else {
+                frag = Global.getSettings().loadText("data/shaders/shield_vanilla.frag");
+                fill = true;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return null;
